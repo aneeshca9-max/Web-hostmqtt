@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RN ENERGY – MQTT Mobile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- MQTT LIBRARY (STABLE CDN) -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+  <style>
+    body {
+      background: #061a2e;
+      font-family: Arial, sans-serif;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    input, button {
+      width: 90%;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+    }
+    button {
+      background: #ffb300;
+      font-weight: bold;
+    }
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>⚡ RN ENERGY – MQTT</h2>
+
+  <input id="topic" placeholder="Topic" value="test">
+  <input id="msg" placeholder="Message">
+
+  <button onclick="sendMsg()">Send Message</button>
+
+  <div id="status">🔄 Connecting...</div>
+
+<script>
+  // 🔹 HIVE MQ CONFIG (EXACT)
+  const broker =
+    "wss://ec91e389d1624dfa990c2bc883d331.s1.eu.hivemq.cloud:8884/mqtt";
+
+  const options = {
+    username: "aneesh_home",
+    password: "Kuttappan123",
+    clientId: "rn_mobile_" + Math.random().toString(16).substr(2, 8),
+    clean: true,
+    reconnectPeriod: 3000
+  };
+
+  let client;
+  let connected = false;
+
+  try {
+    client = mqtt.connect(broker, options);
+  } catch (e) {
+    document.getElementById("status").innerText = "❌ MQTT library not loaded";
+  }
+
+  client.on("connect", () => {
+    connected = true;
+    document.getElementById("status").innerText = "✅ Connected to HiveMQ";
+  });
+
+  client.on("error", (err) => {
+    connected = false;
+    document.getElementById("status").innerText = "❌ Error: " + err.message;
+  });
+
+  client.on("close", () => {
+    connected = false;
+    document.getElementById("status").innerText = "⚠️ Disconnected";
+  });
+
+  function sendMsg() {
+    if (!connected) {
+      alert("MQTT not connected");
+      return;
+    }
+
+    const topic = document.getElementById("topic").value;
+    const msg = document.getElementById("msg").value;
+
+    client.publish(topic, msg);
+    alert("Message sent ✅");
+  }
+</script>
+
+</body>
+</html>
